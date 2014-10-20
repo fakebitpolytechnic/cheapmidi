@@ -1,4 +1,4 @@
-Using USB/HID instruments with Raspberry Pi running Raspbian
+Using simple USB/HID instruments with Raspberry Pi running Raspbian
 
 To install:
 Plug in USB device(s) and watch which "hidraw" numbers they are given during the startup process (usually hidraw0, 1, 2 etc, though the mouse and keyboard will also have their own values). Then login as usual, type:
@@ -13,8 +13,8 @@ sudo apt-get install fluidsynth
 ...off it goes (might take 5 min or so to unpack etc).
 
 To run it:
-fluidsynth --audio-driver=alsa --gain=1 -m alsa_seq -i -s /usr/share/sounds/sf2/FluidR3_GM.sf2 \ 1>/tmp/fs.out 2>/tmp/fs.out &
-(lengthy command that you can up-arrow once you've got it right)
+fluidsynth --audio-driver=alsa --gain=3 -m alsa_seq -i -s /usr/share/sounds/sf2/FluidR3_GM.sf2 \ 1>/tmp/fs.out 2>/tmp/fs.out &
+(lengthy command that you can up-arrow once you've got it right; gain is adjustable 1=quiet, 5=loud)
 ...wait a few sec then
 
 aconnect -iol
