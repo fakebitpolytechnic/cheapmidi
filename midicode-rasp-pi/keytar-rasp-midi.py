@@ -86,18 +86,28 @@ instrument = CHURCH_ORGAN
     #instrument = GRAND_PIANO
 global midi_out
 midi_out = pygame.midi.Output(port, 0)
-midi_out.set_instrument(0)
 
 port = pygame.midi.get_default_output_id()
 sys.stdout.write ("using output_id :%s:\n\n" % port)
-pipe=open('/dev/hidraw2','r')
+try:
+	pipe=open('/dev/hidraw2','r')
+except IOError:
+	pipe=open('/dev/hidraw0','r')
+
 recd=[]
 global prevdata
 prevdata=[0,0,0,8,128,128,0,0,0,0,0,0,0,0,0,127,0,0,0,0,0,0,0,0,0,224,13,11];
 global octave
 octave=48
 global instrum
-instrum=0
+instrum=40 # solo string sound
+
+midi_out.set_instrument(instrum)
+
+midi_out.note_on(100,127)
+midi_out.note_off(100,127)
+midi_out.note_on(100,127)
+midi_out.note_off(100,127)
 
 while 1:
 	for char in pipe.read(1):
