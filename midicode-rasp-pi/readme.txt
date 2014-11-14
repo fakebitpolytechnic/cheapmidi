@@ -1,5 +1,53 @@
 Using simple USB/HID instruments with Raspberry Pi running Raspbian
 
+NEW SIMPLER VERSION (post November 2014)
+
+As before:
+
+sudo pico /lib/udev/rules.d/91-permissions.rules
+...and insert the following line:
+
+KERNEL=="hidraw*", MODE="0666",GROUP="root"
+(eg copy the KERNEL=="tty", MODE="0666",GROUP="root" line)
+
+Then:
+sudo apt-get install fluidsynth
+...off it goes (might take 5 min or so to unpack etc).
+
+Copy new version of keytar-rasp-midi.py to eg your /pi/python_games/
+directory with the other python sample programs
+
+Then plug in the Wii keytar USB dongle if you haven't already
+(PS3 and Xbox are frustratungly different in their behaviour), and run:
+
+python keytar-rasp-midi.py
+(or wherever you've put it)
+
+
+To auto-run on start, setup autologin eg as follows:
+http://elinux.org/RPi_Debian_Auto_Login
+
+then put this at the end of your /home/.profile:
+python /home/pi/python_games/keytar-rasp-midi.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PREVIOUS VERSION (pre November 2014)
+
+
 To install:
 Plug in USB device(s) and watch which "hidraw" numbers they are given during the startup process (usually hidraw0, 1, 2 etc, though the mouse and keyboard will also have their own values). Then login as usual, type:
 

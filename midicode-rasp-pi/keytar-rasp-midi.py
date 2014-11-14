@@ -1,7 +1,7 @@
 
 import sys
 
-from time import sleep
+import time 
 #from msvcrt import kbhit
 import pygame
 import pygame.midi
@@ -51,57 +51,96 @@ def sample_handler(data):
 
 	if message=='2':
 		instrum+=1
-		if instrum<128:
-			midi_out.set_instrument(instrum)
-		else: instrum=127
+		if instrum>127:
+			instrum=0
+                print "Instr no.{0}".format(instrum)
+		midi_out.set_instrument(instrum)
 
 	if message=='A':
 		instrum-=1
-		if instrum>0:
-			midi_out.set_instrument(instrum)
-		else: instrum=0
+		if instrum<0:
+			instrum=127
+                print "Instr no.{0}".format(instrum)
+		midi_out.set_instrument(instrum)
 
 	if message=='1':
 		octave-=12
 		if octave<0:
 			octave=0
+                print "Octave starting at note.{0}".format(octave)
+
 	if message=='B':
 		octave+=12
-		if octave>96:
-			octave=96
+		if octave>84:
+			octave=84
+                print "Octave starting at note.{0}".format(octave)
 		
         if message: sys.stdout.write(message+"\n")
 
         if data[15]!=prevdata[15]:
             print "Ribbon :{0}".format(data[15])
-	    midi_out.write_short(0xE0,0,data[15])
+	    midi_out.write_short(0xE0,0,data[15]) # currently sending pitchbend
 
 ###
 pygame.init()
 pygame.midi.init()
 port=pygame.midi.get_default_output_id()
-GRAND_PIANO = 0
-CHURCH_ORGAN = 19
-instrument = CHURCH_ORGAN
-    #instrument = GRAND_PIANO
+
+
 global midi_out
 midi_out = pygame.midi.Output(port, 0)
 
 port = pygame.midi.get_default_output_id()
-sys.stdout.write ("using output_id :%s:\n\n" % port)
+sys.stdout.write ("Using MIDI output_id :%s:\n\nScanning for USB input..." % port)
+
+import subprocess
+import os
+p=os.popen('ls /sys/class/hidraw/ -lrU | grep 1BAD:3330 -n',"r") # NB specific USB id for wii keytar
+#p=os.popen('ls /sys/class/hidraw/ -lrU | grep banana -n',"r")
+line=p.readline()
+print "USB info obtained:"
+if line=="":
+	sys.exit ("ERROR: KEYTAR NOT FOUND")
+
+pipenumber='/dev/hidraw'+line[-2:-1]   # get last-but-one character, ie hidraw number
+print line+"Selected USB device: "+pipenumber
+#print (ord(line[0][0])-50)
+
+pmidi=os.popen('aconnect -iol | grep FLUID',"r") # NB change for different software
+line2=pmidi.readline()
+print "\nSynth info obtained:"
+print line2
+if line2=="":
+	print "Synth not detected, please wait 20 secs while it launches...\n(NB it continues to run in the background so use ps -u and kill -9 if it slows down your Pi)"
+	p1=os.popen('fluidsynth --audio-driver=alsa --gain=2 -m alsa_seq -i -s /usr/share/sounds/sf2/FluidR3_GM.sf2 \ 1>/tmp/fs.out 2>/tmp/fs.out &') # NB change for different software
+	time.sleep(25) # ie i don't know how to check previous call has completed!
+	
+	pmidi=os.popen('aconnect -iol | grep FLUID',"r")
+	line2=pmidi.readline()
+	if "128" in line2: p2=os.popen('aconnect 14:0 128:0') # genuinely ashamed by this level of ignorance
+	if "129" in line2: p2=os.popen('aconnect 14:0 129:0') 
+	
+#	p3=os.popen('aconnect -iol') # NB change for different software#
+
+	#sys.exit ("ERROR: SYNTH NOT FOUND")
+
+
+
 try:
-	pipe=open('/dev/hidraw2','r')
+	pipe=open(pipenumber, 'r')
 except IOError:
-	pipe=open('/dev/hidraw0','r')
+	sys.exit("ERROR: COULD NOT ACCESS KEYTAR")
+#	pipe=open('/dev/hidraw1','r')
 
 recd=[]
 global prevdata
 prevdata=[0,0,0,8,128,128,0,0,0,0,0,0,0,0,0,127,0,0,0,0,0,0,0,0,0,224,13,11];
+
 global octave
 octave=48
+
 global instrum
 instrum=40 # solo string sound
-
 midi_out.set_instrument(instrum)
 
 midi_out.note_on(100,127)
@@ -111,7 +150,7 @@ midi_out.note_off(100,127)
 
 while 1:
 	for char in pipe.read(1):
-		recd.append(ord(char))		
+		recd.append(ord(char))	# may be faster way of doing this without ord() call??	
 		if (len(recd)==27):
 			#sys.stdout.flush()
 			if (recd<>prevdata):
@@ -126,3 +165,5 @@ while 1:
 			#oldact=action
 			#action=[]
 
+
+#aconnect -iol
