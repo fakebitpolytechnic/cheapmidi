@@ -5,7 +5,7 @@ open_midi_device("yo", "generic", "CoolSoft VirtualMIDISynth", "CoolSoft Virtual
 
 --other examples of typical MIDI devices
 --open_midi_device("yo", "generic", "IAC Driver Bus 1", "IAC Driver Bus 1")
---^^^ MAC OSX USES THIS "IAC Driver Bus 1" ONE (OR WHATEVER MIDI BUS YOU USE ^^^
+--^^^ MAC OSX USES THIS "IAC Driver Bus 1" ONE (OR WHATEVER MIDI BUS YOU USE) ^^^
 --open_midi_device("yo", "generic", "Microsoft GS Wavetable SW Synth", "Microsoft GS Wavetable SW Synth")
 --open_midi_device("yo", "swsynth", "In From MIDI Yoke:  1", "Out To MIDI Yoke:  1")
 --(this device is called "yo" as short for yoke, "mid" might have been better)
